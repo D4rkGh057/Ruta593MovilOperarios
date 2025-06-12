@@ -53,8 +53,8 @@ android/app/debug.keystore
 android/app/proguard-rules.pro
 android/app/src/debug/AndroidManifest.xml
 android/app/src/main/AndroidManifest.xml
-android/app/src/main/java/com/anonymous/Ruta593MovilOperarios/MainActivity.kt
-android/app/src/main/java/com/anonymous/Ruta593MovilOperarios/MainApplication.kt
+android/app/src/main/java/com/d4rkgh057/Ruta593MovilOperarios/MainActivity.kt
+android/app/src/main/java/com/d4rkgh057/Ruta593MovilOperarios/MainApplication.kt
 android/app/src/main/res/drawable/ic_launcher_background.xml
 android/app/src/main/res/drawable/rn_edit_text_material.xml
 android/app/src/main/res/drawable-hdpi/splashscreen_logo.png
