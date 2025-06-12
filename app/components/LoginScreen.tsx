@@ -1,104 +1,100 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useState } from 'react';
+import { Feather } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
-    Alert,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from 'react-native';
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useAuthStore } from "../adapters/stores/authStore";
 
-const LoginScreen = ({ navigation }: any) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+export default function LoginScreen({ onLogin }: Readonly<{ onLogin?: () => void }>) {
+    const router = useRouter();
+    const [showPassword, setShowPassword] = useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState<string | null>(null);
+    const loginWithCredentials = useAuthStore((state: { loginWithCredentials: (email: string, password: string) => Promise<void> }) => state.loginWithCredentials);
 
-  const handleLogin = async () => {
-    // Aquí deberías implementar la lógica de autenticación real
-    if (username === 'admin' && password === 'admin123') {
-      try {
-        await AsyncStorage.setItem('userToken', 'dummy-token');
-        navigation.replace('Scanner');
-      } catch (error) {
-        Alert.alert('Error', 'No se pudo iniciar sesión');
-      }
-    } else {
-      Alert.alert('Error', 'Credenciales inválidas');
-    }
-  };
+    const handleLogin = async () => {
+        setError(null);
+        try {
+            await loginWithCredentials(email, password);
+            if (onLogin) onLogin();
+            else router.replace("/scanner");
+        } catch (e: any) {
+            setError(e.message ?? "Error al iniciar sesión");
+        }
+    };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Ruta 593</Text>
-      <Text style={styles.subtitle}>Control de Acceso</Text>
-      
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Usuario"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Contraseña"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-      </View>
-
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Iniciar Sesión</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#f5f5f5',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#2196F3',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: '#666',
-    marginBottom: 30,
-  },
-  inputContainer: {
-    width: '100%',
-    marginBottom: 20,
-  },
-  input: {
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  button: {
-    backgroundColor: '#2196F3',
-    padding: 15,
-    borderRadius: 10,
-    width: '100%',
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
-
-export default LoginScreen; 
+    return (
+        <KeyboardAvoidingView
+            behavior={Platform.OS === "android" ? "height" : "padding"}
+            style={{ flex: 1 }}
+        >
+            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                <View className="flex-1 justify-center items-center p-5 bg-white">
+                    <Image
+                        source={require("../../assets/images/mountain.png")}
+                        className="w-280 h-93 mb-12"
+                    />
+                    <Image
+                        source={require("../../assets/images/ruta593.png")}
+                        className="w-280 h-93 mb-4"
+                    />
+                    <Text
+                        style={{ fontFamily: "Inter" }}
+                        className="text-base text-black mb-8 text-center"
+                    >
+                        Viajes Óptimos, Horarios Útiles y Eficientes
+                    </Text>
+                    <TextInput
+                        className="w-80 h-14 border border-gray-300 rounded-xl p-4 mb-2 text-black"
+                        placeholder="Ingresa tu Correo"
+                        placeholderTextColor="#9ca3af"
+                        value={email}
+                        onChangeText={setEmail}
+                        autoCapitalize="none"
+                    />
+                    <View className="w-80 h-14 border border-gray-300 rounded-xl mb-2 flex-row items-center px-4">
+                        <TextInput
+                            className="flex-1 text-black"
+                            placeholder="Ingresa tu Contraseña"
+                            placeholderTextColor="#9ca3af"
+                            secureTextEntry={!showPassword}
+                            value={password}
+                            onChangeText={setPassword}
+                            autoCapitalize="none"
+                        />
+                        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                            <Feather
+                                name={showPassword ? "eye" : "eye-off"}
+                                size={20}
+                                color="#6b7280"
+                            />
+                        </TouchableOpacity>
+                    </View>
+                    {error && <Text className="text-red-500 mb-2">{error}</Text>}
+                    <TouchableOpacity className="self-end mb-5">
+                        <Text className="text-blue-800" style={{ fontFamily: "Inter" }}>
+                            ¿Olvidaste tu contraseña?
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        className="w-56 h-14 bg-yellow-400 justify-center items-center rounded-xl mb-5"
+                        onPress={handleLogin}
+                    >
+                        <Text className="text-black" style={{ fontFamily: "Inter" }}>
+                            Iniciar Sesión
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+        </KeyboardAvoidingView>
+    );
+}

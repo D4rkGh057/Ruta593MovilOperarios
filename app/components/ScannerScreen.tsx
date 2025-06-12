@@ -1,15 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { RNCamera } from 'react-native-camera';
-import QRCodeScanner from 'react-native-qrcode-scanner';
 
 const ScannerScreen = ({ navigation }: any) => {
   const [scannedPassengers, setScannedPassengers] = useState<string[]>([]);
@@ -40,17 +39,13 @@ const ScannerScreen = ({ navigation }: any) => {
         </TouchableOpacity>
       </View>
 
-      <QRCodeScanner
-        onRead={onSuccess}
-        flashMode={RNCamera.Constants.FlashMode.auto}
-        topContent={
-          <Text style={styles.instructions}>
-            Escanea el código QR del pasajero
-          </Text>
-        }
-        containerStyle={styles.scannerContainer}
-        cameraStyle={styles.camera}
-      />
+      <View style={styles.scannerContainer}>
+        <RNCamera
+          style={styles.camera}
+          onBarCodeRead={onSuccess}
+          flashMode={RNCamera.Constants.FlashMode.auto}
+        />
+      </View>
 
       <View style={styles.historyContainer}>
         <Text style={styles.historyTitle}>Registro de Accesos</Text>
@@ -127,4 +122,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ScannerScreen; 
+export default ScannerScreen;

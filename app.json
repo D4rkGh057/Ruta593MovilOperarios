@@ -44,13 +44,6 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ],
-      [
-        "react-native-permissions",
-        {
-          "camera": "Allow $(PRODUCT_NAME) to access your camera",
-          "microphone": "Allow $(PRODUCT_NAME) to access your microphone"
-        }
       ]
     ],
     "experiments": {
