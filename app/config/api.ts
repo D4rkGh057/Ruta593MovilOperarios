@@ -58,3 +58,5 @@ export const API_ENDPOINTS = {
         PROFILE: `${API_BASE_URL}/auth/profile`,
     },
 };
+
+export default API_ENDPOINTS;

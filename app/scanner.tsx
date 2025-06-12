@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
+import ScannerScreen from "./components/ScannerScreen";
 import { checkCameraPermission, requestCameraPermission } from "./utils/permissions";
 
 export default function Scanner() {
@@ -62,7 +63,20 @@ export default function Scanner() {
       {hasPermission === null ? (
         <Text className="text-lg">Solicitando permiso de cámara...</Text>
       ) : hasPermission ? (
-        <Text className="text-lg">Cámara lista para escanear</Text>
+        <ScannerScreen 
+          checkCameraPermissionHandler={checkCameraPermissionHandler}
+          setHasPermission={setHasPermission}
+          hasPermission={hasPermission}
+          setIsCameraActive={() => {}}
+          isCameraActive={true} // Asumiendo que el escáner está activo por defecto
+          setScannedPassengers={() => {}}
+          scannedPassengers={[]}
+          isScanning={false}
+          setIsScanning={() => {}}
+          onSuccess={() => {}}
+          handleLogout={() => {}}
+          navigation={{ replace: () => {} }} // Mock de navegación
+        />
       ) : (
         <View className="items-center">
           <Text className="text-lg text-red-500 mb-4">Sin acceso a la cámara</Text>

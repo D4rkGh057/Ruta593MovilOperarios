@@ -1,62 +1,104 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { Camera, CameraView } from 'expo-camera';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { RNCamera } from 'react-native-camera';
 
-const ScannerScreen = ({ navigation }: any) => {
-  const [scannedPassengers, setScannedPassengers] = useState<string[]>([]);
+const ScannerScreen = () => {
+  const router = useRouter();
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [isCooldownActive, setIsCooldownActive] = useState(false);
 
-  const onSuccess = (e: { data: string }) => {
-    const timestamp = new Date().toLocaleString();
-    const passengerData = `${e.data} - ${timestamp}`;
-    
-    setScannedPassengers(prev => [passengerData, ...prev]);
-    Alert.alert('Éxito', 'Pasajero registrado correctamente');
-  };
+  useEffect(() => {
+    const requestPermission = async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
+    };
+    requestPermission();
+  }, []);
+  // Ajustamos el estado de la cámara para que se desactive al volver de la pantalla de datos escaneados.
+  useFocusEffect(
+    React.useCallback(() => {
+      setIsCameraActive(false);
+      return () => {
+        setIsCameraActive(false);
+      };
+    }, [])
+  );
 
+  // Ajustamos el estado de la cámara para que se desactive automáticamente al desmontar la pantalla.
+  useEffect(() => {
+    return () => {
+      setIsCameraActive(false);
+    };
+  }, []);
+
+  // Ajustamos el manejo de excepciones para cumplir con las mejores prácticas.
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem('userToken');
-      navigation.replace('Login');
+      router.replace('/login');
     } catch (error) {
+      console.error('Error al cerrar sesión:', error);
       Alert.alert('Error', 'No se pudo cerrar sesión');
     }
   };
 
+  const toggleCamera = () => {
+    if (!hasPermission) {
+      Alert.alert('Permiso denegado', 'No se puede activar la cámara sin permisos.');
+      return;
+    }
+    setIsCameraActive(prev => !prev);
+  };
+
+  // Eliminamos la verificación de QR ya escaneado y mejoramos la interfaz para que se vea como una pantalla de escaneos QR.
+  const handleBarcodeScanned = ({ data }: { data: string }) => {
+    if (isCooldownActive) {
+      return;
+    }
+
+    console.log('Código escaneado:', data);
+    router.push({ pathname: '/components/ScannedDataScreen', params: { scannedData: data } });
+
+    // Activamos el cooldown por 2 segundos
+    setIsCooldownActive(true);
+    setTimeout(() => {
+      setIsCooldownActive(false);
+    }, 2000);
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Escáner de Acceso</Text>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Cerrar Sesión</Text>
-        </TouchableOpacity>
-      </View>
 
       <View style={styles.scannerContainer}>
-        <RNCamera
-          style={styles.camera}
-          onBarCodeRead={onSuccess}
-          flashMode={RNCamera.Constants.FlashMode.auto}
-        />
+        {isCameraActive ? (
+          <CameraView
+            style={styles.camera}
+            facing='back'
+            onBarcodeScanned={handleBarcodeScanned}
+          />
+        ) : (
+          <Text style={styles.instructions}>Presiona el botón para activar la cámara y escanear un código QR</Text>
+        )}
       </View>
 
-      <View style={styles.historyContainer}>
-        <Text style={styles.historyTitle}>Registro de Accesos</Text>
-        <ScrollView style={styles.scrollView}>
-          {scannedPassengers.map((passenger, index) => (
-            <View key={index} style={styles.historyItem}>
-              <Text style={styles.historyText}>{passenger}</Text>
-            </View>
-          ))}
-        </ScrollView>
-      </View>
+      <TouchableOpacity className="bg-yellow-500 p-4 rounded-lg mt-4" onPress={toggleCamera}>
+        <Text className="text-black text-lg font-bold text-center">
+          {isCameraActive ? 'Detener Escaneo' : 'Comenzar Escaneo'}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity className="p-4 mt-4 bg-red-500 rounded-lg" onPress={handleLogout}>
+        <Text className="text-white text-base font-bold text-center">Cerrar Sesión</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -64,61 +106,66 @@ const ScannerScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f0f0f0',
+    padding: 10,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 15,
-    backgroundColor: '#2196F3',
+    backgroundColor: '#4CAF50',
+    borderRadius: 10,
+    marginBottom: 10,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
   },
   logoutButton: {
-    padding: 8,
+    padding: 10,
+    backgroundColor: '#f44336',
+    borderRadius: 5,
   },
   logoutText: {
     color: 'white',
     fontSize: 16,
+    fontWeight: 'bold',
   },
   scannerContainer: {
     flex: 1,
-  },
-  camera: {
-    flex: 1,
-  },
-  instructions: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    margin: 10,
-  },
-  historyContainer: {
-    flex: 1,
-    padding: 15,
-  },
-  historyTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  historyItem: {
-    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
     padding: 10,
-    borderRadius: 5,
-    marginBottom: 5,
     borderWidth: 1,
     borderColor: '#ddd',
   },
-  historyText: {
-    fontSize: 14,
+  camera: {
+    width: 400,
+    height: 400,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  instructions: {
+    fontSize: 18,
+    color: '#666',
+    textAlign: 'center',
+    margin: 20,
+  },
+  scanButton: {
+    backgroundColor: '#4CAF50',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  scanButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 
