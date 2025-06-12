@@ -24,3 +24,5 @@ export const useBusStore = create<BusState>((set) => ({
         }
     },
 }));
+
+export default useBusStore;

@@ -9,3 +9,5 @@ export class ParadaService {
         return fetch(API_ENDPOINTS.PARADAS.GET_BY_CIUDAD(ciudad)).then((res) => res.json());
     }
 }
+
+export default ParadaService;

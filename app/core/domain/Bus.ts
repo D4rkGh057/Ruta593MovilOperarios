@@ -15,3 +15,5 @@ export interface Bus {
         fecha_creacion: string;
     }>;
 }
+
+export default Bus;

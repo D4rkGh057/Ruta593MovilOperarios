@@ -9,3 +9,5 @@ export interface User {
     telefono: string;
     direccion: string;
 }
+
+export default User;

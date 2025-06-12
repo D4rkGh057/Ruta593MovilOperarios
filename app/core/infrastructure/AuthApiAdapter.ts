@@ -5,10 +5,13 @@ import { AuthService } from "./AuthService";
 // Implementación simulada (mock) de autenticación
 export class AuthApiAdapter implements LoginPort {
     async login(email: string, password: string): Promise<{ user: User; token: string }> {
-        const result = await AuthService.login(email, password);
-        // Si la API solo retorna el token, puedes devolver solo el token y dejar user como null o vacío
-        // Si la API retorna datos de usuario junto con el token, ajusta el mapeo aquí
-        return { user: result.user ?? {}, token: result.token };
+        try {
+            const result = await AuthService.login(email, password);
+            return { user: result.user ?? {}, token: result.token };
+        } catch (error) {
+            console.error("Error en AuthApiAdapter login:", error);
+            throw error; // Propaga el error para que sea manejado en niveles superiores
+        }
     }
 
     async register(email: string, password: string): Promise<{ user: User; token: string }> {
@@ -26,3 +29,5 @@ export class AuthApiAdapter implements LoginPort {
         return { user: result.user ?? {}, token: result.token };
     }
 }
+
+export default AuthApiAdapter;

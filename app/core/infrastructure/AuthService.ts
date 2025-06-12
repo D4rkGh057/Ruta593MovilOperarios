@@ -13,15 +13,23 @@ export class AuthService {
             });
 
             if (!response.ok) {
-                const error = await response.json().catch(() => ({}));
-                console.error("Error en la respuesta de la API:", error);
-                throw new Error(error.message ?? `Error al iniciar sesión: ${response.status} ${response.statusText}`);
+                const error = (await response.json().catch(() => null)) as {
+                    message?: string;
+                    error?: string;
+                    statusCode?: number;
+                } | null;
+
+                const errorMessage = error?.message ?? "Credenciales inválidas o usuario no encontrado";
+                throw new Error(errorMessage);
             }
 
             return response.json();
         } catch (error) {
             console.error("Error al realizar la solicitud de login:", error);
-            throw new Error("Error de red o del servidor al intentar iniciar sesión");
+            if (error instanceof Error) {
+                throw new Error(error.message ?? "Error de red o del servidor");
+            }
+            throw new Error("Error desconocido");
         }
     }
 
@@ -65,3 +73,5 @@ export class AuthService {
         return response.json();
     }
 }
+
+export default AuthService;

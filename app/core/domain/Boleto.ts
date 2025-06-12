@@ -11,3 +11,5 @@ export interface Boleto {
     }>;
     fecha_emision: string;
 }
+
+export default Boleto;

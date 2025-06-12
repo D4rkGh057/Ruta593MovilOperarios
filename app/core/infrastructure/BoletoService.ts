@@ -23,3 +23,5 @@ export class BoletoService {
         return response.json();
     }
 }
+
+export default BoletoService;

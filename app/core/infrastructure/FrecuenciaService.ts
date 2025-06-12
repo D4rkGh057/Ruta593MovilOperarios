@@ -9,3 +9,5 @@ export class FrecuenciaService {
         return fetch(API_ENDPOINTS.FRECUENCIAS.GET_BY_DESTINO(destino)).then((res) => res.json());
     }
 }
+
+export default FrecuenciaService;

@@ -6,3 +6,5 @@ export class UserService {
         throw new Error("No implementado");
     }
 }
+
+export default UserService;

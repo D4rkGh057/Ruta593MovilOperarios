@@ -26,3 +26,5 @@ export class LoginUseCase {
         return result;
     }
 }
+
+export default LoginUseCase;

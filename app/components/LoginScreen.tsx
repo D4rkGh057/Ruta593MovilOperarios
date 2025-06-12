@@ -2,14 +2,14 @@ import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useAuthStore } from "../adapters/stores/authStore";
 
@@ -28,6 +28,7 @@ export default function LoginScreen({ onLogin }: Readonly<{ onLogin?: () => void
             if (onLogin) onLogin();
             else router.replace("/scanner");
         } catch (e: any) {
+            console.info("Error al iniciar sesión:", e);
             setError(e.message ?? "Error al iniciar sesión");
         }
     };

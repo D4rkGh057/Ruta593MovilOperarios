@@ -17,3 +17,5 @@ export class BusService {
         return response.json();
     }
 }
+
+export default BusService;

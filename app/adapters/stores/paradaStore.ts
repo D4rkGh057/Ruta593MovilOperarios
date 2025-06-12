@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { Parada } from "../../core/domain/Parada";
+
+import Parada from "@/app/core/domain/Parada";
 import { ParadaService } from "../../core/infrastructure/ParadaService";
 
 interface ParadaState {
@@ -23,3 +24,5 @@ export const useParadaStore = create<ParadaState>((set) => ({
         }
     },
 }));
+
+export default useParadaStore;

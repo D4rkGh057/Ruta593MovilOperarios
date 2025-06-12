@@ -17,3 +17,5 @@ export interface Frecuencia {
     bus?: any;
     rutas: any[];
 }
+
+export default Frecuencia;
