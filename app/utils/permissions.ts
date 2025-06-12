@@ -11,3 +11,5 @@ export const requestCameraPermission = async (): Promise<boolean> => {
   const { status } = await Camera.requestCameraPermissionsAsync();
   return status === 'granted';
 };
+
+export default { checkCameraPermission, requestCameraPermission };
