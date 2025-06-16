@@ -1,8 +1,6 @@
-interface Parada {
-    parada_id: number;
+export interface Parada {
+    parada_id?: number;
     ciudad: string;
     activo: boolean;
-    fecha_creacion: string;
+    fecha_creacion?: string;
 }
-
-export default Parada;

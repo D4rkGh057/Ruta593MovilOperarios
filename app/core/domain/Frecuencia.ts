@@ -1,8 +1,9 @@
 export interface Frecuencia {
-    frecuencia_id: number;
+    frecuencia_id?: number;
     nombre_frecuencia: string;
     bus_id: number;
     conductor_id: number;
+    cooperativa_id?: number;
     hora_salida: string;
     hora_llegada: string;
     origen: string;
@@ -12,10 +13,8 @@ export interface Frecuencia {
     total: number;
     nro_aprobacion: string;
     es_directo: boolean;
-    fecha_creacion: string;
+    fecha_creacion?: string;
     conductor?: any;
     bus?: any;
-    rutas: any[];
+    rutas?: any[];
 }
-
-export default Frecuencia;

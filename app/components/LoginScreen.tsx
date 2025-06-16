@@ -2,6 +2,7 @@ import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+    Alert,
     Image,
     KeyboardAvoidingView,
     Platform,
@@ -23,13 +24,19 @@ export default function LoginScreen({ onLogin }: Readonly<{ onLogin?: () => void
 
     const handleLogin = async () => {
         setError(null);
+        if (!email || !password) {
+            setError("Por favor, ingresa tu correo y contraseña.");
+            return;
+        }
         try {
             await loginWithCredentials(email, password);
             if (onLogin) onLogin();
             else router.replace("/scanner");
         } catch (e: any) {
-            console.info("Error al iniciar sesión:", e);
-            setError(e.message ?? "Error al iniciar sesión");
+            console.error("Error al iniciar sesión:", e);
+            const errorMessage = e.message ?? "Error al iniciar sesión. Por favor, verifica tus credenciales.";
+            setError(errorMessage);
+            Alert.alert("Error", errorMessage);
         }
     };
 

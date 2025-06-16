@@ -2,7 +2,11 @@ import { API_ENDPOINTS } from "../../config/api";
 
 export class BoletoService {
     static async getBoletoById(boletoId: number) {
-        return fetch(`${API_ENDPOINTS.BOLETOS.GET_BY_ID(boletoId)}`)
+        const response = await fetch(API_ENDPOINTS.BOLETOS.GET_BY_ID(boletoId));
+        if (!response.ok) {
+            throw new Error(`Error al obtener boleto: ${response.status}`);
+        }
+        return response.json();
     }
 
     static async getAllBoletos() {
@@ -22,6 +26,50 @@ export class BoletoService {
         }
         return response.json();
     }
-}
 
-export default BoletoService;
+    static async createBoleto(boletoData: any) {
+        const response = await fetch(API_ENDPOINTS.BOLETOS.CREATE, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(boletoData),
+        });
+        if (!response.ok) {
+            throw new Error(`Error al crear boleto: ${response.status}`);
+        }
+        return response.json();
+    }
+
+    static async updateBoleto(boletoId: number, boletoData: any) {
+        const response = await fetch(API_ENDPOINTS.BOLETOS.UPDATE(boletoId), {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(boletoData),
+        });
+        if (!response.ok) {
+            throw new Error(`Error al actualizar boleto: ${response.status}`);
+        }
+        return response.json();
+    }
+
+    static async deleteBoleto(boletoId: number) {
+        const response = await fetch(API_ENDPOINTS.BOLETOS.DELETE(boletoId), {
+            method: "DELETE",
+        });
+        if (!response.ok) {
+            throw new Error(`Error al eliminar boleto: ${response.status}`);
+        }
+        return response.json();
+    }
+
+    static async getBoletosByReserva(reservaId: number) {
+        const response = await fetch(API_ENDPOINTS.BOLETOS.GET_BY_RESERVA(reservaId));
+        if (!response.ok) {
+            throw new Error(`Error al obtener boletos por reserva: ${response.status}`);
+        }
+        return response.json();
+    }
+}

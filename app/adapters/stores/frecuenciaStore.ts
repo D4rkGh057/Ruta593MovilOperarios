@@ -33,5 +33,3 @@ export const useFrecuenciaStore = create<FrecuenciaState>((set) => ({
         }
     },
 }));
-
-export default useFrecuenciaStore;
