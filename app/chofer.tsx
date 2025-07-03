@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "./adapters/stores/authStore";
-import { Boleto } from "./core/domain/Boleto";
 import { Frecuencia } from "./core/domain/Frecuencia";
+import { Reserva } from "./core/domain/Reserva";
 import { BoletoService } from "./core/infrastructure/BoletoService";
 import { FrecuenciaService } from "./core/infrastructure/FrecuenciaService";
+import { ReservaService } from "./core/infrastructure/ReservaService";
 
 interface PasajeroInfo {
-    boleto: Boleto;
+    reserva: Reserva;
     validado: boolean;
 }
 
@@ -50,16 +51,51 @@ export default function ChoferScreen() {
             setLoading(true);
             const frecuenciasData = await frecuenciaService.getFrecuenciasByConductor(user.usuario_id);
             
-            // Por cada frecuencia, obtener los boletos asociados
+            // Obtener todas las reservas
+            const todasLasReservas = await ReservaService.getAllReservas();
+            
+            // Obtener la fecha actual en formato YYYY-MM-DD
+            const fechaActual = new Date().toISOString().split('T')[0];
+            console.log('Fecha actual:', fechaActual);
+            
+            // Por cada frecuencia, filtrar las reservas que coincidan con frecuencia_id y fecha
             const frecuenciasConPasajeros: FrecuenciaConPasajeros[] = await Promise.all(
                 frecuenciasData.map(async (frecuencia: Frecuencia) => {
                     try {
-                        const boletos = await boletoService.getBoletosByFrecuencia(frecuencia.frecuencia_id?.toString() || '0');
+                        // Filtrar reservas por frecuencia_id y fecha
+                        const reservasDeLaFrecuencia = todasLasReservas.filter((reserva: Reserva) => {
+                            // Extraer solo la fecha de reserva.fecha_viaje (formato: 2025-07-03T15:00:00.000Z)
+                            const fechaReserva = reserva.fecha_viaje.split('T')[0];
+                            
+                            return reserva.frecuencia_id === frecuencia.frecuencia_id && 
+                                   fechaReserva === fechaActual;
+                        });
+                        console.log(`Reservas para frecuencia ${frecuencia.frecuencia_id}:`, reservasDeLaFrecuencia);
                         
-                        const pasajeros: PasajeroInfo[] = boletos.map(boleto => ({
-                            boleto,
-                            validado: boleto.estado === 'validado' || boleto.estado === 'usado'
-                        }));
+                        // Para cada reserva, obtener el boleto usando boleto_id
+                        const pasajeros: PasajeroInfo[] = await Promise.all(
+                            reservasDeLaFrecuencia.map(async (reserva: Reserva) => {
+                                try {
+                                    // Obtener el boleto usando el boleto_id de la reserva
+                                    const boleto = await boletoService.getBoletoById(reserva.boleto_id.toString());
+                                    
+                                    return {
+                                        reserva: {
+                                            ...reserva,
+                                            boleto // Agregar el boleto completo a la reserva
+                                        },
+                                        validado: boleto.estado === 'validado' || boleto.estado === 'usado'
+                                    };
+                                } catch (error) {
+                                    console.error(`Error al obtener boleto ${reserva.boleto_id}:`, error);
+                                    // Si no se puede obtener el boleto, usar la información de la reserva
+                                    return {
+                                        reserva,
+                                        validado: false
+                                    };
+                                }
+                            })
+                        );
 
                         return {
                             ...frecuencia,
@@ -69,7 +105,7 @@ export default function ChoferScreen() {
                             pasajerosNoValidados: pasajeros.filter(p => !p.validado).length,
                         };
                     } catch (error) {
-                        console.error(`Error al cargar boletos para frecuencia ${frecuencia.frecuencia_id}:`, error);
+                        console.error(`Error al procesar reservas para frecuencia ${frecuencia.frecuencia_id}:`, error);
                         return {
                             ...frecuencia,
                             pasajeros: [],
@@ -95,8 +131,8 @@ export default function ChoferScreen() {
             // Actualizar el estado local
             if (selectedFrecuencia) {
                 const updatedPasajeros = selectedFrecuencia.pasajeros.map(p => 
-                    p.boleto.boleto_id?.toString() === boletoId 
-                        ? { ...p, validado: true, boleto: { ...p.boleto, estado: 'validado' } }
+                    p.reserva.boleto_id?.toString() === boletoId 
+                        ? { ...p, validado: true, reserva: { ...p.reserva, boleto: { ...p.reserva.boleto, estado: 'validado' } } }
                         : p
                 );
                 
@@ -184,25 +220,30 @@ export default function ChoferScreen() {
             <View className="flex-row justify-between items-start">
                 <View className="flex-1">
                     <Text className="font-medium text-gray-800" style={{ fontFamily: "Inter" }}>
-                        {item.boleto.usuario?.primer_nombre} {item.boleto.usuario?.primer_apellido}
+                        {item.reserva.nombre_pasajero}
                     </Text>
                     <Text className="text-sm text-gray-600" style={{ fontFamily: "Inter" }}>
-                        Asientos: {item.boleto.asientos}
+                        Asiento: {item.reserva.boleto.asientos ?? 'N/A'}
                     </Text>
                     <Text className="text-sm text-gray-600" style={{ fontFamily: "Inter" }}>
-                        Cantidad: {item.boleto.cantidad_asientos}
+                        Identificación: {item.reserva.identificacion_pasajero}
                     </Text>
+                    {item.reserva.boleto && (
+                        <Text className="text-sm text-gray-600" style={{ fontFamily: "Inter" }}>
+                            Boleto: {item.reserva.boleto_id}
+                        </Text>
+                    )}
                 </View>
                 <View className="items-end">
                     <Text className={`text-sm font-medium ${item.validado ? 'text-green-600' : 'text-red-600'}`} style={{ fontFamily: "Inter" }}>
                         {item.validado ? '✅ Validado' : '❌ Pendiente'}
                     </Text>
                     <Text className="text-xs text-gray-500 mb-2" style={{ fontFamily: "Inter" }}>
-                        ${item.boleto.total}
+                        ${item.reserva.boleto?.total ?? item.reserva.precio}
                     </Text>
                     {!item.validado && (
                         <TouchableOpacity
-                            onPress={() => validarBoleto(item.boleto.boleto_id?.toString() || '')}
+                            onPress={() => validarBoleto(item.reserva.boleto_id?.toString() ?? '')}
                             className="bg-blue-500 px-3 py-1 rounded-md"
                             activeOpacity={0.7}
                         >
@@ -233,6 +274,14 @@ export default function ChoferScreen() {
             if (filtroValidacion === 'pendientes') return !pasajero.validado;
             return true; // 'todos'
         });
+        console.log('Pasajeros filtrados:', pasajerosFiltrados.map(p => ({
+            nombre: p.reserva.nombre_pasajero,
+            validado: p.validado,
+            boletoId: p.reserva.boleto_id,
+            calamar: p.reserva.boleto.asientos
+        }))
+        );
+        const totalPasajeros = pasajerosFiltrados.length;
 
         return (
             <SafeAreaView className="flex-1 bg-gray-50">
@@ -264,7 +313,7 @@ export default function ChoferScreen() {
                     <View className="flex-row justify-around mt-3 pt-3 border-t border-gray-100">
                         <View className="items-center">
                             <Text className="text-xl font-bold text-gray-800" style={{ fontFamily: "Inter" }}>
-                                {selectedFrecuencia.totalPasajeros}
+                                {totalPasajeros}
                             </Text>
                             <Text className="text-xs text-gray-500" style={{ fontFamily: "Inter" }}>
                                 Total
@@ -320,7 +369,7 @@ export default function ChoferScreen() {
                 <FlatList
                     data={pasajerosFiltrados}
                     renderItem={renderPasajeroItem}
-                    keyExtractor={(item, index) => `${item.boleto.boleto_id}-${index}`}
+                    keyExtractor={(item, index) => `${item.reserva.reserva_id}-${index}`}
                     contentContainerStyle={{ padding: 16 }}
                     ListEmptyComponent={
                         <View className="items-center justify-center py-20">
@@ -402,7 +451,7 @@ export default function ChoferScreen() {
             <FlatList
                 data={frecuencias}
                 renderItem={renderFrecuenciaItem}
-                keyExtractor={(item) => item.frecuencia_id?.toString() || ''}
+                keyExtractor={(item) => item.frecuencia_id?.toString() ?? ''}
                 contentContainerStyle={{ padding: 16 }}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
