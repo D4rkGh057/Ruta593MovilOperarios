@@ -1,5 +1,6 @@
+import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "./adapters/stores/authStore";
@@ -125,39 +126,6 @@ export default function ChoferScreen() {
         }
     };
 
-    const validarBoleto = async (boletoId: string) => {
-        try {
-            await boletoService.validateBoleto(boletoId);
-            // Actualizar el estado local
-            if (selectedFrecuencia) {
-                const updatedPasajeros = selectedFrecuencia.pasajeros.map(p => 
-                    p.reserva.boleto_id?.toString() === boletoId 
-                        ? { ...p, validado: true, reserva: { ...p.reserva, boleto: { ...p.reserva.boleto, estado: 'validado' } } }
-                        : p
-                );
-                
-                const updatedFrecuencia = {
-                    ...selectedFrecuencia,
-                    pasajeros: updatedPasajeros,
-                    pasajerosValidados: updatedPasajeros.filter(p => p.validado).length,
-                    pasajerosNoValidados: updatedPasajeros.filter(p => !p.validado).length,
-                };
-                
-                setSelectedFrecuencia(updatedFrecuencia);
-                
-                // También actualizar en la lista principal
-                setFrecuencias(prev => prev.map(f => 
-                    f.frecuencia_id === selectedFrecuencia.frecuencia_id 
-                        ? updatedFrecuencia 
-                        : f
-                ));
-            }
-        } catch (error) {
-            console.error('Error al validar boleto:', error);
-            // Aquí podrías mostrar un alert o toast con el error
-        }
-    };
-
     const onRefresh = async () => {
         setRefreshing(true);
         await cargarFrecuenciasDelConductor();
@@ -167,6 +135,15 @@ export default function ChoferScreen() {
     useEffect(() => {
         cargarFrecuenciasDelConductor();
     }, [user]);
+
+    // Refrescar automáticamente cuando la pantalla tome el foco (ej: al regresar del scanner)
+    useFocusEffect(
+        React.useCallback(() => {
+            if (user?.usuario_id) {
+                cargarFrecuenciasDelConductor();
+            }
+        }, [user])
+    );
 
     const renderFrecuenciaItem = ({ item }: { item: FrecuenciaConPasajeros }) => (
         <TouchableOpacity
@@ -241,17 +218,6 @@ export default function ChoferScreen() {
                     <Text className="text-xs text-gray-500 mb-2" style={{ fontFamily: "Inter" }}>
                         ${item.reserva.boleto?.total ?? item.reserva.precio}
                     </Text>
-                    {!item.validado && (
-                        <TouchableOpacity
-                            onPress={() => validarBoleto(item.reserva.boleto_id?.toString() ?? '')}
-                            className="bg-blue-500 px-3 py-1 rounded-md"
-                            activeOpacity={0.7}
-                        >
-                            <Text className="text-white text-xs font-medium" style={{ fontFamily: "Inter" }}>
-                                Validar
-                            </Text>
-                        </TouchableOpacity>
-                    )}
                 </View>
             </View>
         </View>
