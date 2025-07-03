@@ -31,7 +31,7 @@ export default function LoginScreen({ onLogin }: Readonly<{ onLogin?: () => void
         try {
             await loginWithCredentials(email, password);
             if (onLogin) onLogin();
-            else router.replace("/scanner");
+            else router.replace("/role-selection");
         } catch (e: any) {
             console.error("Error al iniciar sesión:", e);
             const errorMessage = e.message ?? "Error al iniciar sesión. Por favor, verifica tus credenciales.";

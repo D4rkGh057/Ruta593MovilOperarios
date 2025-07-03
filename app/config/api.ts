@@ -12,36 +12,45 @@ export const API_ENDPOINTS = {
     },
     // Frecuencias
     FRECUENCIAS: {
+        GET_ALL: `${API_BASE_URL}/frecuencias`,
         GET_BY_ORIGEN: (origen: string) => `${API_BASE_URL}/frecuencias/origen/${origen}`,
         GET_BY_DESTINO: (destino: string) => `${API_BASE_URL}/frecuencias/destino/${destino}`,
+        GET_BY_CONDUCTOR: (conductorId: string) => `${API_BASE_URL}/frecuencias/conductor/${conductorId}`,
+        GET_BY_BUS: (busId: string) => `${API_BASE_URL}/frecuencias/bus/${busId}`,
+        GET_BY_ID: (id: string) => `${API_BASE_URL}/frecuencias/${id}`,
+        GET_BY_PROVINCIA: (provincia: string) => `${API_BASE_URL}/frecuencias/provincia/${provincia}`,
+        CREATE: `${API_BASE_URL}/frecuencias`,
+        UPDATE: (id: string) => `${API_BASE_URL}/frecuencias/${id}`,
+        DELETE: (id: string) => `${API_BASE_URL}/frecuencias/${id}`,
     },
     // Reservas
     RESERVAS: {
-        CREATE: `${API_BASE_URL}/reserva`,
         GET_BY_USER: (userId: string) => `${API_BASE_URL}/reserva/usuario/${userId}`,
     },
     // Boletos
     BOLETOS: {
-        CREATE: `${API_BASE_URL}/boletos`,
         GET_ALL: `${API_BASE_URL}/boletos`,
-        GET_BY_ID: (id: number) => `${API_BASE_URL}/boletos/${id}`,
+        GET_BY_ID: (id: string) => `${API_BASE_URL}/boletos/${id}`,
         GET_BY_USER: (userId: string) => `${API_BASE_URL}/boletos/usuario/${userId}`,
+        GET_BY_FRECUENCIA: (frecuenciaId: string) => `${API_BASE_URL}/boletos/frecuencia/${frecuenciaId}`,
+        GET_BY_RESERVA: (reservaId: string) => `${API_BASE_URL}/boletos/reserva/${reservaId}`,
+        CREATE: `${API_BASE_URL}/boletos`,
+        UPDATE: (id: string) => `${API_BASE_URL}/boletos/${id}`,
+        DELETE: (id: string) => `${API_BASE_URL}/boletos/${id}`,
+        VALIDATE: (boletoId: string) => `${API_BASE_URL}/boletos/${boletoId}/validate`,
     },
     // Cooperativas
     COOPERATIVAS: {
-        CREATE: `${API_BASE_URL}/cooperativa`,
         GET_ALL: `${API_BASE_URL}/cooperativa`,
-        GET_BY_ID: (id: number) => `${API_BASE_URL}/cooperativa/${id}`,
-        UPDATE: (id: number) => `${API_BASE_URL}/cooperativa/${id}`,
-        DELETE: (id: number) => `${API_BASE_URL}/cooperativa/${id}`,
+        GET_BY_ID: (id: string) => `${API_BASE_URL}/cooperativa/${id}`,
     },
     // Buses
     BUSES: {
         CREATE: `${API_BASE_URL}/buses`,
         GET_ALL: `${API_BASE_URL}/buses`,
-        GET_BY_ID: (id: number) => `${API_BASE_URL}/buses/${id}`,
-        UPDATE: (id: number) => `${API_BASE_URL}/buses/${id}`,
-        DELETE: (id: number) => `${API_BASE_URL}/buses/${id}`,
+        GET_BY_ID: (id: string) => `${API_BASE_URL}/buses/${id}`,
+        UPDATE: (id: string) => `${API_BASE_URL}/buses/${id}`,
+        DELETE: (id: string) => `${API_BASE_URL}/buses/${id}`,
     },
     // Usuarios
     USUARIOS: {

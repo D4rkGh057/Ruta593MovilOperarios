@@ -17,13 +17,13 @@ export default function Index() {
                     style={{ fontFamily: "Inter" }}
                     className="text-base text-black mt-2 text-center"
                 >
-                    Bienvenido Operario
+                    Bienvenido
                 </Text>
                 <Text
                     style={{ fontFamily: "Inter" }}
                     className="text-sm text-gray-600 mt-2 text-center"
                 >
-                    Escanea los boletos QR de los pasajeros para validar su viaje.
+                    Empezemos un nuevo viaje.
                 </Text>
             </View>
             <View className="flex-1 justify-center items-center w-full">
@@ -38,7 +38,7 @@ export default function Index() {
                 activeOpacity={0.8}
             >
                 <Text className="text-black text-lg" style={{ fontFamily: "Inter" }}>
-                    Escanear QR
+                    Comenzar
                 </Text>
             </TouchableOpacity>
         </SafeAreaView>
