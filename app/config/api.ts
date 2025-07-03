@@ -39,6 +39,7 @@ export const API_ENDPOINTS = {
         UPDATE: (id: string) => `${API_BASE_URL}/boletos/${id}`,
         DELETE: (id: string) => `${API_BASE_URL}/boletos/${id}`,
         VALIDATE: (boletoId: string) => `${API_BASE_URL}/boletos/${boletoId}/validate`,
+        PATCH: (boletoId: string) => `${API_BASE_URL}/boletos/${boletoId}`,
     },
     // Cooperativas
     COOPERATIVAS: {

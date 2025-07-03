@@ -17,7 +17,7 @@ const ScannerScreen = () => {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isCooldownActive, setIsCooldownActive] = useState(false);
-  
+
   const boletoService = new BoletoService();
 
   useEffect(() => {
@@ -70,7 +70,7 @@ const ScannerScreen = () => {
     }
 
     console.log('Código escaneado:', data);
-    
+
     try {
       // Activar cooldown inmediatamente para evitar escaneos múltiples
       setIsCooldownActive(true);
@@ -85,26 +85,29 @@ const ScannerScreen = () => {
       console.log('ID del boleto:', parsedData.boleto_id);
       // Primero verificar si el boleto existe y obtener su estado
       const boleto = await boletoService.getBoletoById(parsedData.boleto_id);
-      
+      console.log('Boleto encontrado:', boleto);
+
       if (!boleto) {
         Alert.alert('Error', 'Boleto no encontrado');
         setTimeout(() => setIsCooldownActive(false), 2000);
         return;
       }
-      
+
       // Verificar si el boleto ya está validado
       if (boleto.estado === 'validado' || boleto.estado === 'usado') {
         Alert.alert(
-          'Boleto ya validado', 
+          'Boleto ya validado',
           `Este boleto ya fue validado anteriormente.\n\nPasajero: ${boleto.usuario?.primer_nombre ?? 'N/A'} ${boleto.usuario?.primer_apellido ?? ''}\nEstado: ${boleto.estado}`
         );
         setTimeout(() => setIsCooldownActive(false), 2000);
         return;
       }
-      
+
       // Si el boleto no está validado, proceder a validarlo
-      await boletoService.validateBoleto(parsedData.boleto_id);
-      
+      console.log('Validando boleto con ID:', parsedData.boleto_id);
+      const resultadoValidacion = await boletoService.validateBoleto(parsedData.boleto_id);
+      console.log('Resultado de la validación:', resultadoValidacion);
+
       Alert.alert(
         'Boleto validado exitosamente', 
         `El boleto ha sido validado correctamente.\n\nPasajero: ${boleto.usuario?.primer_nombre ?? 'N/A'} ${boleto.usuario?.primer_apellido ?? ''}\nAsientos: ${boleto.asientos ?? 'N/A'}`,
@@ -112,13 +115,13 @@ const ScannerScreen = () => {
           {
             text: 'OK',
             onPress: () => {
-              // Opcional: navegar a la pantalla de datos escaneados
-              router.push({ pathname: '/components/ScannedDataScreen', params: { scannedData: data } });
+              //cerrar la alerta
+              
             }
           }
         ]
       );
-      
+
     } catch (error) {
       console.error('Error al procesar boleto:', error);
       Alert.alert('Error', 'No se pudo procesar el boleto. Intenta nuevamente.');

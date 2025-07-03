@@ -38,16 +38,20 @@ export class BoletoService {
     }
 
     async validateBoleto(boletoId: string): Promise<Boleto> {
-        const response = await fetch(API_ENDPOINTS.BOLETOS.VALIDATE(boletoId), {
+        const response = await fetch(API_ENDPOINTS.BOLETOS.PATCH(boletoId), {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
             },
+            body: JSON.stringify({
+                estado: "validado"
+            }),
         });
         if (!response.ok) {
             const error = await response.json().catch(() => ({}));
             throw new Error(error.message ?? "Error al validar boleto");
         }
+        console.log("Respuesta de validación:", response);
         return response.json();
     }
 
